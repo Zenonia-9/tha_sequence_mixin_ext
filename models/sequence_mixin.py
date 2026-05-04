@@ -18,28 +18,31 @@ class SequenceMixin(models.AbstractModel):
     # A journal should enter daily mode only after an accountant deliberately
     # posts a daily-shaped sequence such as BILL/2026/05/02/0001.
     _sequence_daily_regex = (
-        r"^(?P<prefix1>.*?)"
-        r"(?P<year>((?<=\D)|(?<=^))((19|20|21)\d{2}|(\d{2}(?=\D))))"
-        r"(?P<prefix2>\D*?)"
-        r"(?P<month>(0[1-9]|1[0-2]))"
-        r"(?P<prefix3>\D+?)"
-        r"(?P<day>(0[1-9]|[12]\d|3[01]))"
-        r"(?P<prefix4>\D+?)"
-        r"(?P<seq>\d*)"
+        r"^(?P<prefix1>[^/]+/)"
+        r"(?P<year>(?:19|20|21)\d{2})"
+        r"(?P<prefix2>/)"
+        r"(?P<month>0[1-9]|1[0-2])"
+        r"(?P<prefix3>/)"
+        r"(?P<day>0[1-9]|[12]\d|3[01])"
+        r"(?P<prefix4>/)"
+        r"(?P<seq>\d+)"
         r"(?P<suffix>\D*?)$"
     )
 
     @api.model
     def _deduce_sequence_number_reset(self, name):
         """Detect daily reset before falling back to native reset detection."""
-        # Native Odoo checks monthly/yearly/fixed formats. A daily sequence is
-        # more specific than monthly, so it must be tested first to avoid being
-        # treated as a broader date sequence by custom regexes.
+        # Daily reset is intentionally strict: only PREFIX/YYYY/MM/DD/SEQ with
+        # a 4-digit calendar year should return "day". Financial-year names
+        # such as JV-FA/10-11/02/0001 must fall through to Odoo's native
+        # year_range_month/year_range detection.
         match = re.match(self._sequence_daily_regex, name or "")
-        if match:
-            groupdict = match.groupdict()
-            if all(groupdict.get(req) is not None for req in ("seq", "year", "month", "day")):
-                return "day"
+        if not match:
+            return super()._deduce_sequence_number_reset(name)
+
+        groupdict = match.groupdict()
+        if all(groupdict.get(req) is not None for req in ("seq", "year", "month", "day")):
+            return "day"
         return super()._deduce_sequence_number_reset(name)
 
     def _get_sequence_format_param(self, previous):
