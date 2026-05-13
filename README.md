@@ -1,165 +1,71 @@
 # THA Sequence Mixin Extension
 
-## Overview
+![Odoo 19](https://img.shields.io/badge/Odoo-19.0-875A7B?style=flat-square)
+![License](https://img.shields.io/badge/License-LGPL--3-blue?style=flat-square)
+![Category](https://img.shields.io/badge/Category-Accounting-4ECDC4?style=flat-square)
 
-`tha_sequence_mixin_ext` extends Odoo 19 native accounting sequence
-behavior to support **daily reset numbering** for `account.move`
-entries.
+Add daily reset support to Odoo 19 accounting sequence detection without patching core files.
 
-Example supported format:
+This module extends Odoo's native sequence logic so `account.move` can recognize and work with **daily reset numbering** such as `BILL/2026/05/02/0001`. It is designed as a narrow, upgrade-friendly extension: native yearly, monthly, and financial-year behaviors stay intact, while a new `day` reset mode becomes available when the sequence format explicitly includes a day component.
 
-    BILL/2026/05/02/0001
-    INV/2026/04/29/001
-    MISC/2026/05/02/0001
+## Highlights
 
-By default, Odoo supports yearly, monthly, year-range, year-range-month,
-and fixed sequences.\
-This module adds **day-level reset detection and handling** while
-preserving full backward compatibility.
+- Detects **daily reset** sequence patterns like `PREFIX/YYYY/MM/DD/0001`.
+- Preserves standard Odoo sequence behaviors for:
+  - yearly reset
+  - monthly reset
+  - year-range reset
+  - year-range-month reset
+  - fixed numbering
+- Extends `account.move` warnings so daily formats are explained correctly to users.
+- Extends the **Resequence Wizard** preview and recomputation flow for daily periods.
+- Respects `sequence_override_regex` on journals.
+- Keeps all changes addon-local with no Odoo core edits.
 
-------------------------------------------------------------------------
+## Example
 
-## Features
+Once a journal is intentionally using a daily sequence pattern, Odoo can continue with values such as:
 
-### Daily Reset Support
+```text
+INV/2026/05/02/0001
+INV/2026/05/02/0002
+INV/2026/05/03/0001
+```
 
-When the latest posted move number is manually changed to:
+## Technical Notes
 
-    INV/2026/05/02/0001
+- `models/sequence_mixin.py`
+  Introduces the custom daily regex, reset deduction, date-range handling, and next-sequence formatting support.
+- `models/account_move.py`
+  Extends the onchange warning logic so daily sequence structures are recognized and described correctly.
+- `models/account_resequence.py`
+  Enhances preview and recomputation logic in `account.resequence.wizard` for exact per-day periods.
 
-Odoo will automatically detect:
+## Module Layout
 
-    Reset type: day
+```text
+tha_sequence_mixin_ext/
+|-- models/
+|-- README.md
+`-- __manifest__.py
+```
 
-And generate:
+## Dependencies
 
-    INV/2026/05/02/0001
-    INV/2026/05/02/0002
-    INV/2026/05/03/0001
-
-### Works Across Accounting Move Types
-
-Supports: - Vendor Bills - Customer Invoices - Journal Entries - Other
-accounting journals using `account.move`
-
-### Resequence Wizard Compatible
-
-Extends `account.resequence.wizard` to:
-
--   Accept daily format in **First New Sequence**
--   Preview correct daily sequence values
--   Restart sequence per accounting date
--   Preserve ordering modes:
-    -   Keep current order
-    -   Reorder by accounting date
-
-### Company and Journal Safe
-
--   Daily reset is not global.
--   Only applies to journals where daily format is manually configured.
--   Changing one company or journal does not affect others.
--   Fully respects `sequence_override_regex`.
-
-### Backward Compatible
-
-Native behaviors remain unchanged:
-
--   Yearly reset
--   Monthly reset
--   Financial year range reset
--   Year-range-month reset
--   Fixed (never reset)
-
-If a journal continues using monthly or yearly format, behavior is
-identical to standard Odoo.
-
-------------------------------------------------------------------------
-
-## Technical Design
-
-This module extends:
-
--   `sequence.mixin`
--   `account.move`
--   `account.resequence.wizard`
-
-Key enhancements:
-
--   Adds daily regex detection
--   Implements daily `_get_sequence_date_range`
--   Extends `_sequence_matches_date`
--   Enhances onchange format warning
--   Updates resequence grouping logic to handle day periods
-
-No Odoo core files are modified.
-
-------------------------------------------------------------------------
-
-## How It Works
-
-Daily reset activates only when the sequence pattern includes:
-
-    YYYY/MM/DD
-
-Example:
-
-    INV/2026/05/02/0001
-
-If the pattern does not include a day component, Odoo behaves normally.
-
-------------------------------------------------------------------------
+- `account`
 
 ## Installation
 
-Place the module inside your custom addons path and update apps list.
+1. Place the module in your custom addons path.
+2. Update the Apps list in Odoo.
+3. Install **THA Sequence Mixin Extension**.
 
-Dependencies: - account
+## Operational Notes
 
-Compatible with: - Odoo 19
-
-------------------------------------------------------------------------
-
-## Usage
-
-1.  Post an invoice normally.
-
-2.  Reset it to draft.
-
-3.  Change the number to include day:
-
-        INV/2026/05/02/0001
-
-4.  Post again.
-
-Odoo will now restart numbering per day.
-
-------------------------------------------------------------------------
-
-## Production Notes
-
--   Designed to be accounting-safe.
--   Does not bypass locking or sequence uniqueness protections.
--   Does not alter existing historical records.
--   Daily reset must be intentionally configured by adjusting sequence
-    format.
--   Recommended to test in staging database before deploying to
-    production.
-
-------------------------------------------------------------------------
-
-## Limitations
-
--   Does not automatically convert monthly sequences to daily.
--   Requires manual format adjustment to activate daily behavior.
-
-------------------------------------------------------------------------
-
-## Author
-
-Thein Htoo Aung
-
-------------------------------------------------------------------------
+- Daily behavior activates only when the sequence format itself contains a day component.
+- This module does not silently convert existing journals from monthly or yearly numbering.
+- Test sequence behavior in a staging database before using it in production accounting flows.
 
 ## License
 
-LGPL-3
+This module is licensed under `LGPL-3`.
