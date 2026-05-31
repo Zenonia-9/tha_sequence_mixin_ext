@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
-    "name": "THA Sequence Mixin Extension",
+    "name": "Sequence Mixin Extension",
     "summary": "Prototype daily reset support for account.move sequence detection.",
     "description": """
-        THA Sequence Mixin Extension
+        Sequence Mixin Extension
         ============================
         
         Extends Odoo's sequence.mixin to support daily reset periods for accounting sequences.

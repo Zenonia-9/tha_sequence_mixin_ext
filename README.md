@@ -1,4 +1,4 @@
-# THA Sequence Mixin Extension
+# Sequence Mixin Extension
 
 ![Odoo 19](https://img.shields.io/badge/Odoo-19.0-875A7B?style=flat-square)
 ![License](https://img.shields.io/badge/License-LGPL--3-blue?style=flat-square)
@@ -58,7 +58,7 @@ tha_sequence_mixin_ext/
 
 1. Place the module in your custom addons path.
 2. Update the Apps list in Odoo.
-3. Install **THA Sequence Mixin Extension**.
+3. Install **Sequence Mixin Extension**.
 
 ## Operational Notes
 
