@@ -15,11 +15,10 @@ class AccountMove(models.Model):
 
     @api.onchange("name", "highest_name")
     def _onchange_name_warning(self):
-        # Prototype note:
-        # This intentionally mirrors the native account.move onchange logic.
-        # The only functional additions are support for the custom `day` reset
-        # type and comparison of daily formats while ignoring the date/sequence
-        # values that naturally change inside the same structural pattern.
+        # This mirrors the native account.move onchange logic. The only
+        # functional additions are support for the custom `day` reset type and
+        # comparison of daily formats while ignoring the date/sequence values
+        # that naturally change inside the same structural pattern.
         if self.name and self.name != "/" and self.name <= (self.highest_name or "") and not self.quick_edit_mode:
             self.show_name_warning = True
         else:

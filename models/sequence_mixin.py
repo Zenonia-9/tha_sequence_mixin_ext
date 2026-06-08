@@ -8,7 +8,6 @@ from odoo import api, fields, models
 class SequenceMixin(models.AbstractModel):
     _inherit = "sequence.mixin"
 
-    # Prototype note:
     # Odoo's native account sequences already infer the reset period from the
     # latest posted name. This module keeps that mechanism and only teaches the
     # parser one additional period: day.
@@ -106,9 +105,9 @@ class SequenceMixin(models.AbstractModel):
         if self._deduce_sequence_number_reset(sequence) != "day":
             return super()._sequence_matches_date()
 
-        # Daily accounting numbers are date-bearing legal identifiers. For this
-        # prototype, the sequence is accepted only when year, month, and day all
-        # describe the move's accounting date.
+        # Daily accounting numbers are date-bearing legal identifiers. The
+        # sequence is accepted only when year, month, and day all describe the
+        # move's accounting date.
         format_values = self._get_sequence_format_param(sequence)[1]
         year_match = not format_values["year"] or self._year_match(format_values["year"], sequence_date.year)
         month_match = not format_values["month"] or format_values["month"] == sequence_date.month

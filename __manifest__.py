@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "Sequence Mixin Extension",
-    "summary": "Prototype daily reset support for account.move sequence detection.",
+    "summary": "Daily reset support for account.move sequence detection.",
     "description": """
         Sequence Mixin Extension
         ============================
